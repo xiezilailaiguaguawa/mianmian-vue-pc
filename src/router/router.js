@@ -13,5 +13,6 @@ const router = new VueRouter({
 })
 // 挂载vue实例上
 // 暴露出去
+// shugf
 // 类似于 moudle.exports = router
 export default router;
