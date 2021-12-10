@@ -1,0 +1,8 @@
+html,body{
+    height: 100%;
+}
+/* 如果严谨格式,要写很多标签 */
+*{
+    margin: 0;
+    padding: 0;
+}

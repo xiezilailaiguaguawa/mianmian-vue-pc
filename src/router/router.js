@@ -9,7 +9,7 @@ Vue.use(VueRouter)
 // 规则
 const routes = [{
     // 登录组件规则
-    Path:"/login",
+    path:"/login",
     component:login
 }]
 
