@@ -2,10 +2,16 @@
 import VueRouter from 'vue-router'
 // 导入vue
 import Vue from 'vue'
+// 导入 登录页面组件
+import login from '../views/login/login.vue'
 // use
 Vue.use(VueRouter)
 // 规则
-const routes = []
+const routes = [{
+    // 登录组件规则
+    Path:"/login",
+    component:login
+}]
 
 // 创建路由实例
 const router = new VueRouter({

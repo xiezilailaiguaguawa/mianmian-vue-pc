@@ -1,15 +1,13 @@
 <template>
-<!-- 路由出口 -->
-  <router-view></router-view>
-
+<div></div>
 </template>
 
 <script>
 export default {
+    name:"login"
+};
 
-}
 </script>
 
 <style>
-
 </style>
