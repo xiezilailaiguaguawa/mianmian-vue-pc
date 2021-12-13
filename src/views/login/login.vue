@@ -78,6 +78,8 @@
 </template>
 
 <script>
+// 导入axios
+import axios from 'axios' ;
 export default {
   name: "login",
   // 数据
@@ -133,7 +135,27 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // 验证成功
-          alert("submit!");
+          // alert("submit!");
+          // 接口调用
+          axios({
+            url:'http://127.0.0.1/heimamm/public/login',
+            method:"post",
+            data:{
+              phone:this.loginForm.phone,
+              password:this.loginForm.password,
+              code:this.loginForm.captcha,
+            },
+            // 1.axios跨域请求时,默认不会携带cookie,导致验证码无法验证
+            // 2.为了携带cookie 添加一个设置:withCredentials:true 设置为true即可
+            withCredentials:true,
+          }).then(res=>{
+            // window.console.log(res)
+              if(res.data.code === 200){
+                this.$message.success('ok')
+              }else{
+                this.$message.warning('登录失败')
+              }
+          })
         } else {
           // 验证失败
           window.console.log("error submit!!");
