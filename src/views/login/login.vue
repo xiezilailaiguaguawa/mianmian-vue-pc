@@ -81,12 +81,13 @@
     <!-- 注册对话框 -->
     <el-dialog title="用户注册" :visible.sync="showReg">
       <!-- 表单 -->
-      <el-form :model="registerForm">
+      <el-form :model="registerForm" :rules="registerRules" ref="registerFrom">
         <!-- 头像 -->
-        <el-form-item label="头像" :label-width="formLabelWidth"
-          ><el-upload
+        <el-form-item label="头像" :label-width="formLabelWidth">
+          <el-upload
             class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            action="http://127.0.0.1/heimamm/public/uploads"
+            name="image"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
@@ -96,34 +97,42 @@
           </el-upload>
         </el-form-item>
         <!-- 昵称 -->
-        <el-form-item label="昵称" :label-width="formLabelWidth">
-          <el-input v-model="registerForm.name" autocomplete="off"></el-input>
+        <el-form-item label="昵称" :label-width="formLabelWidth" prop="username">
+          <el-input
+            v-model="registerForm.username"
+            autocomplete="off"
+          ></el-input>
         </el-form-item>
         <!-- 邮箱 -->
-        <el-form-item label="邮箱" :label-width="formLabelWidth">
-          <el-input v-model="registerForm.name" autocomplete="off"></el-input>
+        <el-form-item label="邮箱" :label-width="formLabelWidth" prop="email">
+          <el-input v-model="registerForm.email" autocomplete="off"></el-input>
         </el-form-item>
         <!-- 手机 -->
         <el-form-item label="手机" :label-width="formLabelWidth">
-          <el-input v-model="registerForm.name" autocomplete="off"></el-input>
+          <el-input v-model="registerForm.phone" autocomplete="off"></el-input>
         </el-form-item>
         <!-- 密码 -->
         <el-form-item label="密码" :label-width="formLabelWidth">
-          <el-input v-model="registerForm.name" autocomplete="off"></el-input>
+          <el-input
+            v-model="registerForm.password"
+            autocomplete="off"
+          ></el-input>
         </el-form-item>
         <!-- 图形码 -->
         <el-form-item label="图形码" :label-width="formLabelWidth">
           <el-row>
             <el-col :span="16">
               <el-input
-                v-model="registerForm.name"
+                v-model="registerForm.code"
                 autocomplete="off"
               ></el-input
             ></el-col>
+            <!-- 图形验证码 -->
             <el-col :span="7" offset="1">
               <img
                 class="captcha"
-                src="../../assets/login_captcha.png"
+                :src="regCaptcha"
+                @click="changeRegCaptcha"
                 alt=""
               />
             </el-col>
@@ -134,25 +143,35 @@
           ><el-row>
             <el-col :span="16">
               <el-input
-                v-model="registerForm.name"
+                v-model="registerForm.rcode"
                 autocomplete="off"
               ></el-input
             ></el-col>
             <el-col :span="7" offset="1">
-              <el-button class="captcha-btn" :type="primary">获取用户验证码</el-button>
+              <!-- 获取手机验证码 -->
+              <el-button
+                class="captcha-btn"
+                @click="getMessage"
+                :type="primary"
+                :disabled="isDisabled"
+                >{{ btnTxt }}</el-button
+              >
             </el-col>
           </el-row>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="showReg = false">取 消</el-button>
-        <el-button type="primary" @click="showReg = false">确 定</el-button>
+        <el-button type="primary" @click="registerUser">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import { login } from "../../api/api.js";
+import { sendsms } from "../../api/api.js";
+import { register } from "../../api/api.js";
 export default {
   name: "login",
   // 数据
@@ -172,6 +191,22 @@ export default {
         } else {
           // 错误的
           callback(new Error("手机号码格式不对"));
+        }
+      }
+    };
+    const checkEmail = (rules, value, callback) => {
+      // value是值
+      if (!value) {
+        callback(new Error("邮箱不能为空"));
+      } else {
+        const reg = /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
+        //验证
+        if (reg.test(value)) {
+          // 正确的
+          callback();
+        } else {
+          // 错误的
+          callback(new Error("邮箱格式不对"));
         }
       }
     };
@@ -204,11 +239,40 @@ export default {
       // 注册对话框是否显示
       showReg: false,
       // 注册表单数据
-      registerForm: {},
+      registerForm: {
+        // 用户头像
+        avatar: "",
+        username: "",
+        phone: "",
+        email: "",
+        password: "",
+        // 图形验证码
+        code: "",
+        // 短信验证码
+        rcode: "",
+      },
+      // 注册表单规则验证
+      registerRules: {
+        // 姓名
+        username: [{ required: true, message: "昵称不能为空" }],
+        // 邮箱
+        email: [
+          {
+            required: true,
+            validator: checkEmail,
+          },
+        ],
+      },
       // 文字的宽度
       formLabelWidth: "67px",
       // 图片地址
       imageUrl: "",
+      // 注册图形验证码
+      regCaptcha: "http://127.0.0.1/heimamm/public/captcha?type=sendsms",
+      // 短信验证码按钮文本
+      btnTxt: "获取短信验证码",
+      // 按钮是否禁用
+      isDisabled: false,
     };
   },
   // 方法
@@ -220,7 +284,7 @@ export default {
       // 布尔判断
       if (!this.checked) {
         this.$message.warning("请勾选用户协议");
-        return;
+        // return;
       }
       // this.$refs['rulesForm']==> 获取饿了么的表单
       // 饿了么的表单.validate()
@@ -229,17 +293,10 @@ export default {
           // 验证成功
           // alert("submit!");
           // 接口调用
-          this.$axios({
-            url: "/login",
-            method: "post",
-            data: {
-              phone: this.loginForm.phone,
-              password: this.loginForm.password,
-              code: this.loginForm.captcha,
-            },
-            // 1.axios跨域请求时,默认不会携带cookie,导致验证码无法验证
-            // 2.为了携带cookie 添加一个设置:withCredentials:true 设置为true即可
-            withCredentials: true,
+          login({
+            phone: this.loginForm.phone,
+            password: this.loginForm.password,
+            code: this.loginForm.captcha,
           }).then((res) => {
             if (res.data.code === 200) {
               this.$message.success("登录成功");
@@ -263,6 +320,9 @@ export default {
     // file 文件信息
     handleAvatarSuccess(res, file) {
       this.imageUrl = URL.createObjectURL(file.raw);
+      // console.log(res)
+      // 保存到表单
+      this.registerForm.avatar = res.data.file_path;
     },
     // 文件上传之前对文件做一些限制
     beforeAvatarUpload(file) {
@@ -276,6 +336,75 @@ export default {
         this.$message.error("上传头像图片大小不能超过 2MB!");
       }
       return isJPG && isLt2M;
+    },
+    // 重新获取注册 图形验证码
+    changeRegCaptcha() {
+      this.regCaptcha = `http://127.0.0.1/heimamm/public/captcha?type=sendsms&${Date.now()}`;
+    },
+    // 获取短信验证码
+    getMessage() {
+      // 非空判断
+      if (this.registerForm.phone.trim() == "") {
+        this.$message.warning("手机号不能为空!");
+        return;
+      }
+      // 格式判断
+      const reg =
+        /^(0|86|17951)?(13[0-9]|15[012356789]|166|17[3678]|18[0-9]|14[57])[0-9]{8}$/;
+      if (!reg.test(this.registerForm.phone)) {
+        this.$message.warning("手机号码格式不对");
+        return;
+      }
+      // 说明 格式 内容都有
+      sendsms({
+        phone: this.registerForm.phone,
+        code: this.registerForm.code,
+      }).then((res) => {
+        console.log(res);
+        // this.registerForm.code == res
+      });
+
+      let time = 60;
+      // 禁用按钮 开启定时器
+      this.isDisabled = true;
+      const interId = setInterval(() => {
+        // 递减
+        time--;
+        // 修改页面
+        this.btnTxt = `${time}S后再次获取`;
+        if (time == 0) {
+          clearInterval(interId);
+          // 重新启用按钮
+          this.isDisabled = false;
+          // 还原文本
+          this.btnTxt = "获取手机验证码";
+        }
+      }, 100);
+    },
+    // 用户注册
+    registerUser() {
+      this.$refs.registerFrom.validate((valid) => {
+        if (valid) {
+          // 验证成功
+          // alert("submit!");
+          // 接口调用
+          // window.alert("okm");
+          register({
+            avater: this.registerForm.avater,
+            email: this.registerForm.email,
+            name: this.registerForm.username,
+            password: this.registerForm.password,
+            phone: this.registerForm.phone,
+            rcode: this.registerForm.rcode,
+          }).then((res) => {
+            console.log(res);
+          });
+        } else {
+          // 验证失败
+          window.console.log("error submit!!");
+          return false;
+        }
+      });
     },
   },
 };
@@ -359,15 +488,25 @@ export default {
     }
   }
   // 对话框中的样式
-  .captcha{
+  .captcha {
     height: 41px;
     width: 100%;
   }
-  .captcha-btn{
+  .captcha-btn {
     width: 100%;
   }
-  .el-dialog{
+  // 对话框
+  .el-dialog {
     width: 602px;
+  }
+  .el-dialog {
+    .el-dialog__header {
+      text-align: center;
+      background: linear-gradient(to right, #01c5fa, #1394fa);
+      .el-dialog__title {
+        color: white;
+      }
+    }
   }
 }
 // 头像组件样式
@@ -397,5 +536,4 @@ export default {
   height: 178px;
   display: block;
 }
-
 </style>
