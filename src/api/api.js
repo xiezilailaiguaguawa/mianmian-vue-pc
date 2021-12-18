@@ -1,5 +1,7 @@
 // 导入axios
 import axios from 'axios'
+// 导入获取token的工具函数
+import { getToken }  from '../utils/token.js'
 //  统一设置基地址
 axios.defaults.baseURL = "http://127.0.0.1/heimamm/public";
 // 设置跨域携带cookie
@@ -29,5 +31,15 @@ export function register(data) {
         url: "/register",
         method: "post",
         data
+    });
+}
+// 获取用户信息接口
+export function userInfo() {
+    return axios({
+        url: "/user/info",
+        method: "get",
+        headers: {
+                token:getToken()
+        }
     });
 }

@@ -97,7 +97,11 @@
           </el-upload>
         </el-form-item>
         <!-- 昵称 -->
-        <el-form-item label="昵称" :label-width="formLabelWidth" prop="username">
+        <el-form-item
+          label="昵称"
+          :label-width="formLabelWidth"
+          prop="username"
+        >
           <el-input
             v-model="registerForm.username"
             autocomplete="off"
@@ -169,9 +173,10 @@
 </template>
 
 <script>
-import { login } from "../../api/api.js";
-import { sendsms } from "../../api/api.js";
-import { register } from "../../api/api.js";
+// 导入抽取api的方法
+import { login, register, sendsms } from "../../api/api.js";
+// 导入抽取token方法
+import { setToken } from "../../utils/token.js";
 export default {
   name: "login",
   // 数据
@@ -214,9 +219,9 @@ export default {
       // 登录表单数据
       loginForm: {
         // 手机号
-        phone: "18888888888",
+        phone: "13345677654",
         // 密码
-        password: "88888888",
+        password: "123456",
         // 验证码
         captcha: "",
       },
@@ -250,6 +255,8 @@ export default {
         code: "",
         // 短信验证码
         rcode: "",
+        // 短信信息
+        sendcode: "",
       },
       // 注册表单规则验证
       registerRules: {
@@ -300,6 +307,13 @@ export default {
           }).then((res) => {
             if (res.data.code === 200) {
               this.$message.success("登录成功");
+              // 跳转
+              this.$router.push("/index");
+              // 保存凭证
+              // console.log(res);
+              // window.localStorage.setItem('mmtoken',res.data.data.token);
+              // 调用工具函数 保存token
+              setToken(res.data.data.token);
             } else {
               this.$message.warning(res.data.message);
             }
@@ -361,6 +375,7 @@ export default {
         code: this.registerForm.code,
       }).then((res) => {
         console.log(res);
+        this.registerForm.rcode = res.data.data.captcha;
         // this.registerForm.code == res
       });
 
@@ -390,7 +405,7 @@ export default {
           // 接口调用
           // window.alert("okm");
           register({
-            avater: this.registerForm.avater,
+            avatar: this.registerForm.avatar,
             email: this.registerForm.email,
             name: this.registerForm.username,
             password: this.registerForm.password,
@@ -398,6 +413,8 @@ export default {
             rcode: this.registerForm.rcode,
           }).then((res) => {
             console.log(res);
+            this.$message.success("注册成功");
+            this.showReg = false;
           });
         } else {
           // 验证失败

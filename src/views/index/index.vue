@@ -13,13 +13,11 @@
         <span class="title">黑马面面</span>
       </div>
       <div class="right">
-        <img
-          class="avatar"
-          src="../../assets/src=http___bbsfiles.vivo.com.cn_vivobbs_attachment_forum_201608_26_185946jia8igiaugy8yyyg.jpg&refer=http___bbsfiles.vivo.com.jpg"
-          alt=""
-        />
-        <span class="name">傻逼,你好</span>
-        <el-button class="logout" type="primary" size="mini">退出</el-button>
+        <img class="avatar" :src="avatar" alt="" />
+        <span class="name">{{ name }},你好</span>
+        <el-button class="logout" type="primary" size="mini" @click="logout"
+          >退出</el-button
+        >
       </div>
     </el-header>
     <el-container>
@@ -63,13 +61,72 @@
 </template>
 
 <script>
+// 导入获取token的函数工具
+import { getToken, removeToken } from "../../utils/token.js";
+// 导入用户信息接口方法
+import { userInfo } from "../../api/api.js";
 export default {
   name: "index",
   data() {
     return {
       // 是否折叠
       isCollapse: false,
+      // 头像
+      avatar: "",
+      // 名字
+      name: "",
     };
+  },
+  // 生命周期钩子
+  beforeCreate() {
+    // 判断token是否存在
+    const token = getToken();
+    if (!token) {
+      // 提示用户
+      this.$message.error("用户未登录");
+      // 不存在 去登录页
+      this.$router.push("/login");
+    }
+  },
+  // 创建钩子
+  mounted() {
+    userInfo().then((res) => {
+      if(res.data.code===0){ 
+        // token有问题
+        this.$message.error("token有问题")
+        // 删除token
+        removeToken();
+        // 去登录页
+        this.$router.push("/login");
+        return
+      }
+      // window.console.log(res); 
+      // 保存在data中
+      this.avatar = `http://127.0.0.1/heimamm/public/${res.data.data.avatar}`;
+      this.name = res.data.data.name;
+    });
+  },
+  methods: {
+    // 退出按钮逻辑
+    logout() {
+      this.$confirm("你将要离开我这个网站了，555", "警告", {
+        confirmButtonText: "狠心离开",
+        cancelButtonText: "继续留下",
+        type: "error",
+      })
+        .then(() => {
+          // 删除token
+          removeToken();
+          // 去登录页
+          this.$router.push("/login");
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "爱你哟，ღ( ´･ᴗ･` )比心",
+          });
+        });
+    },
   },
 };
 </script>
