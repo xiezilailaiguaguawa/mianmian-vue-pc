@@ -26,7 +26,7 @@
       <el-aside width="auto" class="aside">
         <el-menu
           router
-          default-active="5"
+          :default-active="active"
           class="el-menu-vertical-demo"
           :collapse="isCollapse"
         >
@@ -75,6 +75,8 @@ export default {
       avatar: "",
       // 名字
       name: "",
+      // 导航刷新bug
+      active: "",
     };
   },
   // 生命周期钩子
@@ -90,17 +92,19 @@ export default {
   },
   // 创建钩子
   mounted() {
+    //  给el-menu中default-active的属性动态绑定 通过判断地址栏#之后的地址是在哪一个页面
+    this.active = window.location.href.split("#")[1];
     userInfo().then((res) => {
-      if(res.data.code===0){ 
-        // token有问题
-        this.$message.error("token有问题")
-        // 删除token
-        removeToken();
-        // 去登录页
-        this.$router.push("/login");
-        return
-      }
-      // window.console.log(res); 
+      // if (res.data.code === 0) {
+      //   // token有问题
+      //   this.$message.error("token有问题");
+      //   // 删除token
+      //   removeToken();
+      //   // 去登录页
+      //   this.$router.push("/login");
+      //   return;
+      // }
+      // window.console.log(res);
       // 保存在data中
       this.avatar = `http://127.0.0.1/heimamm/public/${res.data.data.avatar}`;
       this.name = res.data.data.name;
@@ -174,7 +178,7 @@ export default {
     // background-color: skyblue;
   }
   .main {
-    background-color: red;
+    background-color: #ccc;
   }
   // 折叠菜单相关的类名
   .el-menu-vertical-demo:not(.el-menu--collapse) {
