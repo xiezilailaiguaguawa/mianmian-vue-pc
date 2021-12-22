@@ -21,7 +21,12 @@
         <el-form-item>
           <el-button type="primary" @click="search">搜索</el-button>
           <el-button type="">清除</el-button>
-          <el-button type="primary" icon="el-icon-plus">新增学科</el-button>
+          <el-button
+            type="primary"
+            @click="addFormVisible = true"
+            icon="el-icon-plus"
+            >新增学科</el-button
+          >
         </el-form-item>
       </el-form>
     </el-card>
@@ -62,6 +67,39 @@
       >
       </el-pagination>
     </el-card>
+    <!-- 新增对话框 -->
+    <el-dialog title="新增学科" :visible.sync="addFormVisible">
+      <el-form :model="addForm" :rules="addRules" ref="addForm">
+        <el-form-item label="学科编号" prop="rid" :label-width="formLabelWidth">
+          <el-input v-model="addForm.rid" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item
+          label="学科名称"
+          prop="name"
+          :label-width="formLabelWidth"
+        >
+          <el-input v-model="addForm.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="学科简称" :label-width="formLabelWidth">
+          <el-input v-model="addForm.short_name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="学科简介" :label-width="formLabelWidth">
+          <el-input
+            v-model="addForm.intro"
+            type="textarea"
+            :rows="2"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="学科备注" :label-width="formLabelWidth">
+          <el-input v-model="addForm.remark" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitAdd">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -72,7 +110,7 @@ export default {
   name: "subject",
   data() {
     return {
-      // 筛选的表格
+      // 筛选的表单
       formInline: {},
       // 数据
       tableData: [],
@@ -84,6 +122,39 @@ export default {
       pageSizes: [5, 10, 15, 20],
       // 总条数
       total: 0,
+      // 新增表单是否显示
+      addFormVisible: false,
+      // 新增表单数据
+      addForm: {
+        // 学科编号
+        rid: "",
+        // 学科名称
+        name: "",
+        // 学科简称
+        short_name: "",
+        // 学科简介
+        intro: "",
+        // 学科备注
+        remark: "",
+      },
+      // label的宽度不设置不能在同一行
+      formLabelWidth: "100px",
+      addRules: {
+        rid: [
+          {
+            required: true,
+            message: "手机号不能为空",
+            trigger: "blur",
+          },
+        ],
+        name: [
+          {
+            required: true,
+            message: "手机号不能为空",
+            trigger: "blur",
+          },
+        ],
+      },
     };
   },
   created() {
@@ -125,7 +196,6 @@ export default {
       this.page = 1;
       // 重新获取数据
       this.getList();
-      
     },
     // 页码改变
     handleCurrentChange(current) {
@@ -133,6 +203,27 @@ export default {
       // 重新获取数据
       this.getList();
     },
+    // 提交新增表单
+    submitAdd() {
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          // 成功
+          // 调用接口
+          subject.add(this.addForm).then(res=>{
+            if(res.data.code === 200){
+              this.addFormVisible=false;
+              this.getList();
+            }else{
+              this.$message.error("添加失败");
+            }
+          })
+        } else {
+          this.$message.warning("资料错误!")
+          return false;
+        }
+      });
+    },
+
   },
 };
 </script>

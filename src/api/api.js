@@ -20,7 +20,7 @@ axios.defaults.withCredentials = true;
 // 可以统一设置header
 axios.interceptors.request.use(function (config) {
     config.headers.token = getToken();
-    console.log(1);
+    // console.log(1);
     // console.log('request--interceptors')
     // console.log(config);
     // config.headers.token="i am a token"
@@ -101,11 +101,11 @@ export const subject = {
     },
     // 列表
     // get 请求的参数用params来传递
-    list(data) {
+    list(params) {
         return axios({
             url: "subject/list",
-            params: "get",
-            data
+            method: "get",
+            params
         })
     },
     // 状态
