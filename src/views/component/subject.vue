@@ -67,7 +67,6 @@
               {{ scope.row.status === 1 ? "禁用" : "启用" }}
             </el-button>
             <el-button
-              v-power="['管理员']"
               @click="remove(scope.row)"
               type="text"
               >删除</el-button
@@ -218,7 +217,7 @@ export default {
             this.$message.success("添加成功");
             this.getSubjectList();
           } else {
-            this.$message.error("系统出错,请稍后尝试");
+            this.$message.error(res.data.message);
           }
         })
         .catch(() => {

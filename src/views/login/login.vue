@@ -237,7 +237,7 @@ export default {
       },
       captchaSrc: "http://127.0.0.1/heimamm/public/captcha?type=login",
       regcaptchaSrc: "http://127.0.0.1/heimamm/public/captcha?type=sendsms",
-      checked: false,
+      checked: true,
       dialogVisible: false,
       regForm: {
         nickname: "",
@@ -376,6 +376,9 @@ export default {
         avatar: "",
       };
     },
+    handleClose() {
+      this.dialogVisible = false;
+    }
   },
 };
 </script>

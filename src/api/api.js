@@ -7,6 +7,19 @@ axios.defaults.baseURL = "http://127.0.0.1/heimamm/public";
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(
   function(config) {
+    if(config.url !== '/user/info' && getToken()) {
+      axios({
+        url: "/user/info",
+        method: "get"
+      }).then(res => {
+        if (res.data.code === 0 ) {
+          Message.error(res.data.message);
+          removeToken();
+          router.push("/login");
+          return;
+        }
+      });
+    }
     config.headers.token = getToken();
     return config;
   },
@@ -15,13 +28,17 @@ axios.interceptors.request.use(
   }
 );
 axios.interceptors.response.use(
+  // function(response) {
+  //   if (response.data.code === 0 && response.data.message === 'token参数错误') {
+  //     Message.error(response.data.message);
+  //     removeToken();
+  //     router.push("/login");
+  //     return;
+  //   }
+  //   return response;
+  // },
+
   function(response) {
-    if (response.data.code === 0) {
-      Message.error(response.data.message);
-      removeToken();
-      router.push("/login");
-      return;
-    }
     return response;
   },
   function(error) {

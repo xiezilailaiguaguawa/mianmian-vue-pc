@@ -4,7 +4,7 @@ import Vue from 'vue'
 import { Message } from "element-ui";
 
 // 导入 获取token的方法
-import { getToken } from "../utils/token.js";
+import { getToken,removeToken } from "../utils/token.js";
 
 // 导入 获取用户信息的逻辑
 import { userInfo } from "../api/api.js";
@@ -117,6 +117,12 @@ router.beforeEach((to, from, next) => {
       if (res.data.data.status === 0) {
         Message.warning("请等待管理员启用你！！");
         return next("/login");
+      }
+      if (res.data.code === 0 ) {
+        Message.error(res.data.message);
+        removeToken();
+        router.push("/login");
+        return;
       }
       if (to.meta.roles.indexOf(res.data.data.role) == -1) {
         Message.warning("你不允许访问这个页面");
