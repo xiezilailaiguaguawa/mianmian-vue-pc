@@ -28,17 +28,17 @@
       </el-form>
     </el-card>
     <!-- 表单 -->
-    <el-card class="box-card">
-      <el-table :data="tableData" stripe style="width: 100%" border> 
+    <el-card class="main-card">
+      <el-table :data="tableData" stripe style="width: 100%" border>
         <el-table-column type="index" width="50" label="序号">
         </el-table-column>
-        <el-table-column prop="name" label="企业编号" width="100">
+        <el-table-column prop="date" label="企业编号" width="100">
         </el-table-column>
-        <el-table-column prop="address" label="企业名称"> </el-table-column>
-        <el-table-column prop="address" label="所属领域"> </el-table-column>
-        <el-table-column prop="address" label="创建者"> </el-table-column>
-        <el-table-column prop="address" label="创建日期"> </el-table-column>
-        <el-table-column prop="address" label="状态"> </el-table-column>
+        <el-table-column prop="name" label="企业名称"> </el-table-column>
+        <el-table-column prop="address" label="简称"> </el-table-column>
+        <el-table-column prop="skill" label="创建者"> </el-table-column>
+        <el-table-column prop="skill" label="创建日期"> </el-table-column>
+        <el-table-column label="状态"> </el-table-column>
         <el-table-column prop="address" label="操作">
           <template>
             <el-button type="text">编辑</el-button>
@@ -64,10 +64,39 @@
 <script>
 export default {
   name: "enterprise",
- 
+  data() {
+    return {
+      formInline: {
+        user: "",
+        region: "",
+      },
+      tableData: [],
+    };
+  },
+  methods: {
+    onSubmit() {
+      console.log("submit!");
+    },
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`);
+    },
+  },
 };
 </script>
 
 <style lang="less">
-
+.enterprise{
+  // 分页器的样式
+  .el-pagination{
+    text-align: center;
+    margin-top: 30px;
+  }
+}
+  // 主体区域 card 样式
+.main-card {
+  margin-top: 36px;
+}
 </style>

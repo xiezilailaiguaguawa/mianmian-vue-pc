@@ -1,7 +1,7 @@
 // 导入axios
 import axios from 'axios'
 // 导入获取token的工具函数
-import { getToken , removeToken} from '../utils/token.js'
+import { getToken, removeToken } from '../utils/token.js'
 // 导入 Element-ui对话框
 import { Message } from 'element-ui';
 // 导入 路由
@@ -45,14 +45,14 @@ axios.interceptors.response.use(
             // 去登录页
             router.push("/login");
             return;
-          }
+        }
 
-    return response;
-}, function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    return Promise.reject(error);
-});
+        return response;
+    }, function (error) {
+        // Any status codes that falls outside the range of 2xx cause this function to trigger
+        // Do something with response error
+        return Promise.reject(error);
+    });
 // 封装登录接口（login）
 export function login(data) {
     return axios({
@@ -87,4 +87,49 @@ export function userInfo() {
         //     token: getToken()
         // }
     });
+}
+// 作用域 抽取学科接口
+// 可以用subject.add subject.list调用接口
+export const subject = {
+    // 新增
+    add(data) {
+        return axios({
+            url: "subject/add",
+            method: "post",
+            data
+        })
+    },
+    // 列表
+    // get 请求的参数用params来传递
+    list(data) {
+        return axios({
+            url: "subject/list",
+            params: "get",
+            data
+        })
+    },
+    // 状态
+    status(data) {
+        return axios({
+            url: "subject/status",
+            method: "post",
+            data
+        })
+    },
+    // 编辑
+    edit(data) {
+        return axios({
+            url: "subject/edit",
+            method: "post",
+            data
+        })
+    },
+    // 删除
+    remove(data) {
+        return axios({
+            url: "subject/remove",
+            method: "post",
+            data
+        })
+    }
 }
